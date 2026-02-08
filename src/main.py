@@ -19,7 +19,7 @@ class sirClank:
     def __init__(self):
        self.right_motors=MotorGroup(Ports.PORT1,Ports.PORT8)
        self.left_motors=MotorGroup(Ports.PORT19,Ports.PORT11)#directions are based from the back
-       self.intake=Motor(Ports.PORT20,Ports.PORT9)
+       self.intake=MotorGroup(Ports.PORT20,Ports.PORT9)
     def drive(self,pos):
         self.right_motors.spin(FORWARD,pos*2)
         self.left_motors.spin(FORWARD,pos*2)
