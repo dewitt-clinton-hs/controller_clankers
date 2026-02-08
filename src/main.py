@@ -10,60 +10,65 @@
 # Library imports
 from vex import *
 
-# Brain should be defined by default
-brain=Brain()
-
-# Robot configuration code
-controller=Controller()
-class sirClank:
+class SirClank:
     def __init__(self):
-       self.right_motors=MotorGroup(Ports.PORT1,Ports.PORT8)
-       self.left_motors=MotorGroup(Ports.PORT19,Ports.PORT11)#directions are based from the back
-       self.intake=MotorGroup(Ports.PORT20,Ports.PORT9)
+        self.right_front = Motor(Ports.PORT1, True)
+        self.right_back = Motor(Ports.PORT8, True)
+
+        self.left_front = Motor(Ports.PORT11, True)
+        self.left_back = Motor(Ports.PORT19, True)
+       
+        self.right_motors = [self.right_front, self.right_back]
+        self.left_motors = [self.left_front, self.left_back]
+       
+        self.intake=MotorGroup(Ports.PORT20,Ports.PORT9)
+
     def drive(self,pos):
-        self.right_motors.spin(FORWARD,pos*2)
-        self.left_motors.spin(FORWARD,pos*2)
+        for i in self.right_motors: i.spin(FORWARD, pos * 3)
+        for i in self.left_motors: i.spin(FORWARD, pos * 3)
 
     def turn(self,pos):
-        self.right_motors.spin(FORWARD,pos*-2)
-        self.left_motors.spin(FORWARD,pos*-2)
+        for i in self.right_motors: i.spin(FORWARD, pos * -3)
+        for i in self.left_motors: i.spin(FORWARD, pos * 3)
 
-    def intake_object(self,pos):
-       self.intake.spin(pos,200)
+    def intake_object(self,direction):
+       self.intake.spin(direction,200)
        return None
-    
-bot=sirClank()
+
+brain=Brain()
+controller=Controller()
+bot=SirClank()
+
 def autonomous():
     pass
+
+def check_intake():
+    if controller.buttonR1.pressing(): bot.intake_object(FORWARD)
+    elif controller.buttonL1.pressing(): bot.intake_object(REVERSE)
+    else: bot.intake.stop()
 
 def user_control():
     brain.screen.print('DRIVING')
 
     while True:
-        driving = controller.axis3.position() > 15 or controller.axis3.position() < -15
-        turning = controller.axis1.position() > 15 or controller.axis1.position() < -15
+        driving = controller.axis1.position() > 15 or controller.axis1.position() < -15
+        turning = controller.axis3.position() > 15 or controller.axis3.position() < -15
 
-        if controller.buttonR1.pressing(): bot.intake_object(FORWARD)
-        elif controller.buttonL1.pressing(): bot.intake_object(REVERSE)
-        else:
-            bot.intake.stop()
+        check_intake()
+
         if driving:
-            if controller.buttonR1.pressing(): bot.intake_object(FORWARD)
-            elif controller.buttonL1.pressing(): bot.intake_object(REVERSE)
-            else: bot.intake.stop()
+            check_intake()
+
+            if turning: bot.turn(controller.axis3.position())
+            else: bot.drive(controller.axis1.position())
         elif turning:
-            # Checks for other button inputs allows for motion on wheels and for other components to move simultaneously
-            
-            if controller.buttonR1.pressing(): bot.intake_object(FORWARD)
-            elif controller.buttonL1.pressing(): bot.intake_object(REVERSE)
-            else: bot.intake.stop()
-            
-            # Check for driving while turning allows for smooth transitions between modes
-            if driving: bot.drive(controller.axis3.position())
-            else: bot.turn(controller.axis1.position())
+            check_intake()
+
+            if driving: bot.drive(controller.axis1.position())
+            else: bot.turn(controller.axis3.position())
         else:
-            bot.right_motors.stop()
-            bot.left_motors.stop()
+            for i in bot.right_motors: i.stop()
+            for i in bot.left_motors: i.stop()
 comp = Competition(user_control, autonomous)
         
 
