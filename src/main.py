@@ -18,18 +18,18 @@ class SirClank:
         self.left_front = Motor(Ports.PORT11, True)
         self.left_back = Motor(Ports.PORT19, True)
        
-        self.right_motors = [self.right_front, self.right_back]
-        self.left_motors = [self.left_front, self.left_back]
+        self.right_wheels = [self.right_front, self.right_back]
+        self.left_wheels = [self.left_front, self.left_back]
        
         self.intake=MotorGroup(Ports.PORT20,Ports.PORT9)
 
     def drive(self,pos):
-        for i in self.right_motors: i.spin(FORWARD, pos * 3)
-        for i in self.left_motors: i.spin(FORWARD, pos * 3)
+        for i in self.right_wheels: i.spin(FORWARD, pos * 2)
+        for i in self.left_wheels: i.spin(FORWARD, pos * 2)
 
     def turn(self,pos):
-        for i in self.right_motors: i.spin(FORWARD, pos * -3)
-        for i in self.left_motors: i.spin(FORWARD, pos * 3)
+        for i in self.right_wheels: i.spin(FORWARD, pos * -2)
+        for i in self.left_wheels: i.spin(FORWARD, pos * 2)
 
     def intake_object(self,direction):
        self.intake.spin(direction,200)
@@ -40,7 +40,9 @@ controller=Controller()
 bot=SirClank()
 
 def autonomous():
-    pass
+    for i in bot.right_wheels: i.spin_for(FORWARD, 2, INCHES)
+    for i in bot.left_wheels: i.spin_for(FORWARD, 2, INCHES)
+
 
 def check_intake():
     if controller.buttonR1.pressing(): bot.intake_object(FORWARD)
@@ -67,8 +69,8 @@ def user_control():
             if driving: bot.drive(controller.axis1.position())
             else: bot.turn(controller.axis3.position())
         else:
-            for i in bot.right_motors: i.stop()
-            for i in bot.left_motors: i.stop()
+            for i in bot.right_wheels: i.stop()
+            for i in bot.left_wheels: i.stop()
 comp = Competition(user_control, autonomous)
         
 
