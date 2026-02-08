@@ -24,11 +24,11 @@ class SirClank:
         self.intake=MotorGroup(Ports.PORT20,Ports.PORT9)
 
     def drive(self,pos):
-        for i in self.right_wheels: i.spin(FORWARD, pos * 2)
+        for i in self.right_wheels: i.spin(FORWARD, pos * -2)
         for i in self.left_wheels: i.spin(FORWARD, pos * 2)
 
     def turn(self,pos):
-        for i in self.right_wheels: i.spin(FORWARD, pos * -2)
+        for i in self.right_wheels: i.spin(FORWARD, pos * 2)
         for i in self.left_wheels: i.spin(FORWARD, pos * 2)
 
     def intake_object(self,direction):
@@ -40,9 +40,10 @@ controller=Controller()
 bot=SirClank()
 
 def autonomous():
-    for i in bot.right_wheels: i.spin_for(FORWARD, 2, INCHES)
-    for i in bot.left_wheels: i.spin_for(FORWARD, 2, INCHES)
-
+    bot.drive(50)
+    wait(1, SECONDS)
+    for i in bot.right_wheels: i.stop()
+    for i in bot.left_wheels: i.stop()
 
 def check_intake():
     if controller.buttonR1.pressing(): bot.intake_object(FORWARD)
@@ -53,29 +54,22 @@ def user_control():
     brain.screen.print('DRIVING')
 
     while True:
-        driving = controller.axis1.position() > 15 or controller.axis1.position() < -15
-        turning = controller.axis3.position() > 15 or controller.axis3.position() < -15
+        driving = controller.axis3.position() > 15 or controller.axis3.position() < -15
+        turning = controller.axis1.position() > 15 or controller.axis1.position() < -15
 
         check_intake()
 
         if driving:
             check_intake()
 
-            if turning: bot.turn(controller.axis3.position())
-            else: bot.drive(controller.axis1.position())
+            if turning: bot.turn(controller.axis1.position())
+            else: bot.drive(controller.axis3.position())
         elif turning:
             check_intake()
 
-            if driving: bot.drive(controller.axis1.position())
-            else: bot.turn(controller.axis3.position())
+            if driving: bot.drive(controller.axis3.position())
+            else: bot.turn(controller.axis1.position())
         else:
             for i in bot.right_wheels: i.stop()
             for i in bot.left_wheels: i.stop()
 comp = Competition(user_control, autonomous)
-        
-
-           
-
-    
-
-
